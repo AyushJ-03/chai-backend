@@ -204,11 +204,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-  const { currrentPassword, newPassword } = req.body
+  const { currentPassword, newPassword } = req.body
 
   const user = await User.findById(req.user?._id)
 
-  const isPasswordCorrect = await user.isPasswordCorrect(currrentPassword)
+  console.log(currentPassword)
+  console.log(newPassword)
+
+  const isPasswordCorrect = await user.isPasswordCorrect(currentPassword)
 
   if (!isPasswordCorrect) {
     throw new ApiError(400, "Invalid currrent password")
@@ -234,7 +237,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required")
   }
 
-  const user = User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -342,7 +345,7 @@ const getuserChannelProfile = asyncHandler(async (req, res) => {
           $size: "$subscribedTo"
         },
         isSubscribed: {
-          $condition: {
+          $cond: {
             if: { $in: [req.user?._id, "$subscribers.subscriber"] },
             then: true,
             else: false
